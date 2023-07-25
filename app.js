@@ -8,9 +8,8 @@ app.use(express.json());
 const getKrogerToken = async () => {
   const clientId = process.env.CLIENT_ID;
   const clientSecret = process.env.CLIENT_SECRET;
-  const scope = process.env.SCOPE; // Adjust as per your requirements
+  const scope = process.env.SCOPE;
 
-  // Base64 encoding of clientId:clientSecret
   const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
 
   try {
@@ -21,32 +20,45 @@ const getKrogerToken = async () => {
       },
     });
 
-    console.log(response.data);
     return response.data.access_token;
   } catch (error) {
     console.error('Error fetching Kroger API token:', error);
   }
 };
 
+const getKrogerLocations = async (zip, krogerToken) => {
+  try {
+    const response = await axios.get(`https://api.kroger.com/v1/locations?filter.zipCode.near=${zip}`, {
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${krogerToken}`
+      },
+    });
+
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching Kroger locations:', error);
+  }
+};
+
 app.post('/webhook', async (req, res) => {
   console.log('Received POST from Glide');
 
-  // Log the request body
   console.log('Request Body:', req.body);
 
   const rowID = req.body.params.rowID.value;
-  const text = req.body.params.zip.value;
+  const zip = req.body.params.zip.value;
 
-  if (!rowID || !text) {
-    console.error('rowID or text not provided');
+  if (!rowID || !zip) {
+    console.error('rowID or zip not provided');
     return res.sendStatus(400);
   }
 
   const token = process.env.BEARER_TOKEN;
   const krogerToken = await getKrogerToken();
 
-  // Now you can use krogerToken with the Kroger API.
-  console.log('Kroger token:', krogerToken);
+  const locations = await getKrogerLocations(zip, krogerToken);
 
   axios({
     method: 'post',
@@ -62,7 +74,7 @@ app.post('/webhook', async (req, res) => {
           "kind": "set-columns-in-row",
           "tableName": "native-table-MX8xNW5WWoJhW4fwEeN7",
           "columnValues": {
-            "NqLF1": text
+            "NqLF1": zip
           },
           "rowID": rowID
         }
