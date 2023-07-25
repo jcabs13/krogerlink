@@ -84,7 +84,7 @@ app.post('/webhook', async (req, res) => {
           "kind": "set-columns-in-row",
           "tableName": "native-table-MX8xNW5WWoJhW4fwEeN7",
           "columnValues": {
-            "NqLF1": "Testing"
+            "NqLF1": krogerToken
           },
           "rowID": rowID
         }
