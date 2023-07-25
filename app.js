@@ -85,6 +85,44 @@ app.post('/getKrogerToken', (req, res) => {
     });
 });
 
+function getKrogerLocations(rowID, zip, krogerToken) {
+  return new Promise((resolve, reject) => {
+    if (!rowID || !zip || !krogerToken) {
+      console.error('rowID, zip, or krogerToken not provided');
+      return reject('Invalid parameters');
+    }
+
+    const baseUrl = 'https://api.kroger.com/v1/locations';
+    const queryParams = `filter.zipCode.near=${zip}&filter.limit=10`;
+
+    axios.get(`${baseUrl}?${queryParams}`, {
+      headers: {
+        'Authorization': `Bearer ${krogerToken}`
+      }
+    })
+      .then(response => {
+        const krogerLocations = response.data;
+
+        if (krogerLocations && krogerLocations.locations && krogerLocations.locations.length > 0) {
+          const firstLocation = krogerLocations.locations[0];
+          const address = firstLocation.address;
+          const addressString = JSON.stringify(address);
+
+          console.log('Kroger Locations:', addressString);
+          resolve({ addressString });
+        } else {
+          console.error('No Kroger locations found.');
+          reject('No locations found');
+        }
+      })
+      .catch(error => {
+        console.error('Error getting Kroger locations:', error);
+        reject(error);
+      });
+  });
+}
+
+// Usage in Express.js route
 app.post('/getKrogerLocations', (req, res) => {
   console.log('Received POST from Glide');
   console.log('Request Body:', req.body);
@@ -93,45 +131,21 @@ app.post('/getKrogerLocations', (req, res) => {
   const zip = req.body.params.zip?.value;
   const krogerToken = req.body.params.token?.value;
 
-  if (!rowID || !zip || !krogerToken) {
-    console.error('rowID, zip, or krogerToken not provided');
-    return res.sendStatus(400);
-  }
-
-  const baseUrl = 'https://api.kroger.com/v1/locations';
-  const queryParams = `filter.zipCode.near=${zip}&filter.limit=10`;
-
-  axios.get(`${baseUrl}?${queryParams}`, {
-    headers: {
-      'Authorization': `Bearer ${krogerToken}`
-    }
-  })
-    .then(response => {
-      const krogerLocations = response.data;
-
-      // Assuming the Kroger API response contains an array of locations
-      // and we want to extract the address from the first location.
-      if (krogerLocations && krogerLocations.locations && krogerLocations.locations.length > 0) {
-        const firstLocation = krogerLocations.locations[0];
-        const address = firstLocation.address; // This should be an object with address information
-
-        // Convert the address object to a string before sending it back to Glide
-        const addressString = JSON.stringify(address);
-
-        console.log('Kroger Locations:', addressString);
-
-        // Send the addressString back to Glide
-        res.status(200).json({ addressString });
-      } else {
-        console.error('No Kroger locations found.');
-        res.sendStatus(404); // Send 404 status code if no locations are found.
-      }
+  getKrogerLocations(rowID, zip, krogerToken)
+    .then(location => {
+      res.status(200).json(location);
     })
     .catch(error => {
-      console.error('Error getting Kroger locations:', error);
-      res.sendStatus(500);
+      if (error === 'Invalid parameters') {
+        res.sendStatus(400);
+      } else if (error === 'No locations found') {
+        res.sendStatus(404);
+      } else {
+        res.sendStatus(500);
+      }
     });
 });
+
 
 
 const port = process.env.PORT || 3000;
