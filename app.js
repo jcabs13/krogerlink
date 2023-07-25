@@ -35,8 +35,12 @@ const getKrogerLocations = async (zip, krogerToken) => {
       },
     });
 
-    console.log(response.data);
-    return response.data;
+    const locations = response.data.data.map(location => location.location.address.addressLine1);
+
+    const locationsString = locations.join(', ');
+
+    console.log('Locations String:', locationsString);
+    return locationsString;
   } catch (error) {
     console.error('Error fetching Kroger locations:', error);
   }
@@ -58,7 +62,9 @@ app.post('/webhook', async (req, res) => {
   const token = process.env.BEARER_TOKEN;
   const krogerToken = await getKrogerToken();
 
-  const locations = await getKrogerLocations(zip, krogerToken);
+  const locationsString = await getKrogerLocations(zip, krogerToken);
+
+  console.log('Passing locations to Glide:', locationsString);
 
   axios({
     method: 'post',
@@ -74,7 +80,7 @@ app.post('/webhook', async (req, res) => {
           "kind": "set-columns-in-row",
           "tableName": "native-table-MX8xNW5WWoJhW4fwEeN7",
           "columnValues": {
-            "NqLF1": zip
+            "NqLF1": locationsString
           },
           "rowID": rowID
         }
