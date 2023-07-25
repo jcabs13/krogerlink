@@ -85,5 +85,44 @@ app.post('/getKrogerToken', (req, res) => {
     });
 });
 
+app.post('/getKrogerLocations', (req, res) => {
+  console.log('Received POST from Glide');
+
+  // Log the request body
+  console.log('Request Body:', req.body);
+
+  const rowID = req.body.params.rowID?.value;
+  const zip = req.body.params.zip?.value;
+  const krogerToken = req.body.params.token?.value; // Assuming "token" is being passed from Glide
+
+  if (!rowID || !zip || !krogerToken) {
+    console.error('rowID, zip, or krogerToken not provided');
+    return res.sendStatus(400);
+  }
+
+  // Use the Kroger access token to make the request to get Kroger locations
+  const baseUrl = 'https://api.kroger.com/v1/locations';
+  const queryParams = `filter.zipCode.near=${zip}&filter.limit=10`;
+
+  axios.get(`${baseUrl}?${queryParams}`, {
+    headers: {
+      'Authorization': `Bearer ${krogerToken}`
+    }
+  })
+    .then(response => {
+      const krogerLocations = response.data;
+      console.log('Kroger Locations:', krogerLocations);
+      // Do something with the locations, if needed
+
+      // You can send the locations back to Glide, if required
+      res.status(200).json(krogerLocations);
+    })
+    .catch(error => {
+      console.error('Error getting Kroger locations:', error);
+      res.sendStatus(500);
+    });
+});
+
+
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Server listening on port ${port}`));
