@@ -12,10 +12,10 @@ app.post('/getKrogerToken', (req, res) => {
   console.log('Request Body:', req.body);
 
   const rowID = req.body.params.rowID?.value;
-  const text = req.body.params.text?.value;
+  const zip = req.body.params.zip?.value;
 
-  if (!rowID || !text) {
-    console.error('rowID or text not provided');
+  if (!rowID || !zip) {
+    console.error('rowID or zip not provided');
     return res.sendStatus(400);
   }
 
@@ -35,7 +35,7 @@ app.post('/getKrogerToken', (req, res) => {
           "kind": "set-columns-in-row",
           "tableName": "native-table-MX8xNW5WWoJhW4fwEeN7",
           "columnValues": {
-            "NqLF1": text
+            "NqLF1": zip
           },
           "rowID": rowID
         }
