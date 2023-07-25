@@ -12,7 +12,7 @@ app.post('/webhook', (req, res) => {
   console.log('Request Body:', req.body);
 
   const rowID = req.body.params.rowID.value;
-  const text = req.body.params.text.value;
+  const text = req.body.params.zip.value;
 
   if (!rowID || !text) {
     console.error('rowID or text not provided');
