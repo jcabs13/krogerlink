@@ -24,7 +24,7 @@ app.post('/webhook', (req, res) => {
           "kind": "set-columns-in-row",
           "tableName": "native-table-MX8xNW5WWoJhW4fwEeN7",
           "columnValues": {
-            // ... your columnValues here ...
+             "NqLF1": "Received from webhook"
           },
           "rowID": "0f3MGHVYQTSHn4FwKReDZw" // replace 'ROW-ID' with your actual row id
         }
