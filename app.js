@@ -3,8 +3,9 @@ app.post('/webhook', (req, res) => {
     
     const token = process.env.BEARER_TOKEN;
   
-    // Extract rowID from incoming request
+    // Extract rowID and text from incoming request
     const glideRowId = req.body.rowID;
+    const glideText = req.body.text; // replace 'text' with the actual property name if different
   
     axios({
       method: 'post',
@@ -20,9 +21,8 @@ app.post('/webhook', (req, res) => {
             "kind": "set-columns-in-row",
             "tableName": "native-table-MX8xNW5WWoJhW4fwEeN7",
             "columnValues": {
-              "NqLF1": "Received from webhook"
+              "NqLF1": glideText // Use the text from the request
             },
-            // Use rowID from the request
             "rowID": glideRowId 
           }
         ]
