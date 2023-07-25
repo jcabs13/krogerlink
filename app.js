@@ -19,8 +19,8 @@ app.post('/getKrogerToken', (req, res) => {
   }
 
   // Encode the Client ID and Client Secret in Base64 format
-  const krogerClientID = process.env.KROGER_CLIENT_ID;
-  const krogerClientSecret = process.env.KROGER_CLIENT_SECRET;
+  const krogerClientID = process.env.CLIENT_ID;
+  const krogerClientSecret = process.env.CLIENT_SECRET;
   const credentials = base64.encode(`${krogerClientID}:${krogerClientSecret}`);
 
   // Make a POST request to Kroger API for authentication
