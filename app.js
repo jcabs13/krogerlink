@@ -23,6 +23,7 @@ const getKrogerToken = async () => {
     return response.data.access_token;
   } catch (error) {
     console.error('Error fetching Kroger API token:', error);
+    throw error;
   }
 };
 
@@ -35,6 +36,8 @@ const getKrogerLocations = async (zip, krogerToken) => {
       },
     });
 
+    console.log('Kroger Response:', response.data);
+
     const locations = response.data.data.map(location => location.location.address.addressLine1);
 
     const locationsString = locations.join(', ');
@@ -43,6 +46,7 @@ const getKrogerLocations = async (zip, krogerToken) => {
     return locationsString;
   } catch (error) {
     console.error('Error fetching Kroger locations:', error);
+    throw error;
   }
 };
 
@@ -91,15 +95,15 @@ app.post('/webhook', async (req, res) => {
     res.sendStatus(200);
   }).catch((error) => {
     if (error.response) {
-      console.log(error.response.data);
-      console.log(error.response.status);
-      console.log(error.response.headers);
+      console.log('Error Response Data:', error.response.data);
+      console.log('Error Response Status:', error.response.status);
+      console.log('Error Response Headers:', error.response.headers);
     } else if (error.request) {
-      console.log(error.request);
+      console.log('Error Request:', error.request);
     } else {
-      console.log('Error', error.message);
+      console.log('Error Message:', error.message);
     }
-    console.log(error.config);
+    console.log('Error Config:', error.config);
     res.sendStatus(500);
   });
 });
