@@ -4,6 +4,7 @@ const axios = require('axios');
 const app = express();
 
 app.use(express.json());
+app.use(bodyParser.json()); // for parsing application/json
 
 const getKrogerToken = () => {
   const clientId = process.env.CLIENT_ID;
@@ -127,9 +128,9 @@ app.post('/getKrogerLocations', (req, res) => {
   console.log('Received POST from Glide');
   console.log('Request Body:', req.body);
 
-  const rowID = req.body.params.rowID?.value;
-  const zip = req.body.params.zip?.value;
-  const krogerToken = req.body.params.token?.value;
+  const rowID = req.body.params.rowID.value;
+  const zip = req.body.params.zip.value;
+  const krogerToken = req.body.params.krogerToken.value;
 
   getKrogerLocations(rowID, zip, krogerToken)
     .then(location => {
