@@ -26,7 +26,7 @@ app.post('/webhook', (req, res) => {
           "columnValues": {
             // ... your columnValues here ...
           },
-          "rowID": "ROW-ID" // replace 'ROW-ID' with your actual row id
+          "rowID": "0f3MGHVYQTSHn4FwKReDZw" // replace 'ROW-ID' with your actual row id
         }
       ]
     }
