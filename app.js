@@ -5,66 +5,21 @@ const app = express();
 
 app.use(express.json());
 
-const getKrogerToken = async () => {
-  const clientId = process.env.CLIENT_ID;
-  const clientSecret = process.env.CLIENT_SECRET;
-  const scope = process.env.SCOPE;
-
-  const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
-
-  try {
-    const response = await axios.post('https://api.kroger.com/v1/connect/oauth2/token', 'grant_type=client_credentials&scope=' + scope, {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Basic ' + credentials
-      },
-    });
-
-    return response.data.access_token;
-  } catch (error) {
-    console.error('Error fetching Kroger API token:', error);
-  }
-};
-
-const getKrogerLocations = async (zip, krogerToken) => {
-  try {
-    const response = await axios.get(`https://api.kroger.com/v1/locations?filter.zipCode.near=${zip}`, {
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${krogerToken}`
-      },
-    });
-
-    const locations = response.data.data.map(location => location.location.address.addressLine1);
-
-    const locationsString = locations.join(', ');
-
-    console.log('Locations String:', locationsString);
-    return locationsString;
-  } catch (error) {
-    console.error('Error fetching Kroger locations:', error);
-  }
-};
-
-app.post('/webhook', async (req, res) => {
+app.post('/webhook', (req, res) => {
   console.log('Received POST from Glide');
 
+  // Log the request body
   console.log('Request Body:', req.body);
 
   const rowID = req.body.params.rowID.value;
-  const zip = req.body.params.zip.value;
+  const text = req.body.params.zip.value;
 
-  if (!rowID || !zip) {
-    console.error('rowID or zip not provided');
+  if (!rowID || !text) {
+    console.error('rowID or text not provided');
     return res.sendStatus(400);
   }
 
   const token = process.env.BEARER_TOKEN;
-  const krogerToken = await getKrogerToken();
-
-  const locationsString = await getKrogerLocations(zip, krogerToken);
-
-  console.log('Passing locations to Glide:', locationsString);
 
   axios({
     method: 'post',
@@ -80,7 +35,7 @@ app.post('/webhook', async (req, res) => {
           "kind": "set-columns-in-row",
           "tableName": "native-table-MX8xNW5WWoJhW4fwEeN7",
           "columnValues": {
-            "NqLF1": locationsString
+            "NqLF1": text
           },
           "rowID": rowID
         }
