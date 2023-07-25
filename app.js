@@ -87,20 +87,17 @@ app.post('/getKrogerToken', (req, res) => {
 
 app.post('/getKrogerLocations', (req, res) => {
   console.log('Received POST from Glide');
-
-  // Log the request body
   console.log('Request Body:', req.body);
 
   const rowID = req.body.params.rowID?.value;
   const zip = req.body.params.zip?.value;
-  const krogerToken = req.body.params.token?.value; // Assuming "token" is being passed from Glide
+  const krogerToken = req.body.params.token?.value;
 
   if (!rowID || !zip || !krogerToken) {
     console.error('rowID, zip, or krogerToken not provided');
     return res.sendStatus(400);
   }
 
-  // Use the Kroger access token to make the request to get Kroger locations
   const baseUrl = 'https://api.kroger.com/v1/locations';
   const queryParams = `filter.zipCode.near=${zip}&filter.limit=10`;
 
@@ -111,11 +108,24 @@ app.post('/getKrogerLocations', (req, res) => {
   })
     .then(response => {
       const krogerLocations = response.data;
-      console.log('Kroger Locations:', krogerLocations);
-      // Do something with the locations, if needed
 
-      // You can send the locations back to Glide, if required
-      res.status(200).json(krogerLocations);
+      // Assuming the Kroger API response contains an array of locations
+      // and we want to extract the address from the first location.
+      if (krogerLocations && krogerLocations.locations && krogerLocations.locations.length > 0) {
+        const firstLocation = krogerLocations.locations[0];
+        const address = firstLocation.address; // This should be an object with address information
+
+        // Convert the address object to a string before sending it back to Glide
+        const addressString = JSON.stringify(address);
+
+        console.log('Kroger Locations:', addressString);
+
+        // Send the addressString back to Glide
+        res.status(200).json({ addressString });
+      } else {
+        console.error('No Kroger locations found.');
+        res.sendStatus(404); // Send 404 status code if no locations are found.
+      }
     })
     .catch(error => {
       console.error('Error getting Kroger locations:', error);
