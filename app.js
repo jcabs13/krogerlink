@@ -27,7 +27,30 @@ const getKrogerToken = async () => {
   }
 };
 
-app.post('/getKrogerToken', async (req, res) => {
+const getKrogerLocations = async (zip, krogerToken) => {
+  try {
+    const response = await axios.get(`https://api.kroger.com/v1/locations?filter.zipCode.near=${zip}`, {
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${krogerToken}`
+      },
+    });
+
+    console.log('Kroger Response:', response.data);
+
+    const locations = response.data.data.map(location => location.location.address.addressLine1);
+
+    const locationsString = locations.join(', ');
+
+    console.log('Locations String:', locationsString);
+    return locationsString;
+  } catch (error) {
+    console.error('Error fetching Kroger locations:', error);
+    throw error;
+  }
+};
+
+app.post('/webhook', async (req, res) => {
   console.log('Received POST from Glide');
 
   console.log('Request Body:', req.body);
@@ -42,6 +65,8 @@ app.post('/getKrogerToken', async (req, res) => {
 
   const token = process.env.BEARER_TOKEN;
   const krogerToken = await getKrogerToken();
+
+  const locationsString = await getKrogerLocations(zip, krogerToken);
 
   console.log('Passing locations to Glide:', locationsString);
 
