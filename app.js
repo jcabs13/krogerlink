@@ -1,4 +1,3 @@
-require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const app = express();
@@ -8,9 +7,8 @@ app.use(express.json());
 const getKrogerToken = async () => {
   const clientId = process.env.CLIENT_ID;
   const clientSecret = process.env.CLIENT_SECRET;
-  const scope = process.env.SCOPE; // Adjust as per your requirements
+  const scope = process.env.SCOPE;
 
-  // Base64 encoding of clientId:clientSecret
   const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
 
   try {
@@ -21,69 +19,59 @@ const getKrogerToken = async () => {
       },
     });
 
-    console.log(response.data);
     return response.data.access_token;
   } catch (error) {
     console.error('Error fetching Kroger API token:', error);
+    throw error;
   }
 };
 
-app.post('/webhook', async (req, res) => {
-  console.log('Received POST from Glide');
+const getKrogerLocations = async (zip, krogerToken) => {
+  try {
+    const response = await axios.get(`https://api.kroger.com/v1/locations?filter.zipCode.near=${zip}`, {
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${krogerToken}`
+      },
+    });
 
-  // Log the request body
-  console.log('Request Body:', req.body);
+    const locations = response.data.data.slice(0, 3).map(location => location.location.address.addressLine1);
+    const locationsString = locations.join(', ');
 
-  const rowID = req.body.params.rowID.value;
-  const text = req.body.params.zip.value;
-
-  if (!rowID || !text) {
-    console.error('rowID or text not provided');
-    return res.sendStatus(400);
+    return locationsString;
+  } catch (error) {
+    console.error('Error fetching Kroger locations:', error);
+    throw error;
   }
+};
 
-  const token = process.env.BEARER_TOKEN;
-  const krogerToken = await getKrogerToken();
+app.post('/getKrogerToken', async (req, res) => {
+  console.log('Received POST from Glide for getKrogerToken');
 
-  // Now you can use krogerToken with the Kroger API.
-  console.log('Kroger token:', krogerToken);
+  try {
+    const krogerToken = await getKrogerToken();
+    console.log('Kroger Token:', krogerToken);
+    res.json({ krogerToken });
+  } catch (error) {
+    console.error('Error in getKrogerToken:', error);
+    res.status(500).send({ error: 'Error fetching Kroger API token.' });
+  }
+});
 
-  axios({
-    method: 'post',
-    url: 'https://api.glideapp.io/api/function/mutateTables',
-    headers: { 
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-    data: {
-      "appID": "mtVYx3j3ot4FzRCdp3q4",
-      "mutations": [
-        {
-          "kind": "set-columns-in-row",
-          "tableName": "native-table-MX8xNW5WWoJhW4fwEeN7",
-          "columnValues": {
-            "NqLF1": krogerToken
-          },
-          "rowID": rowID
-        }
-      ]
-    }
-  }).then((response) => {
-    console.log(response.data);
-    res.sendStatus(200);
-  }).catch((error) => {
-    if (error.response) {
-      console.log(error.response.data);
-      console.log(error.response.status);
-      console.log(error.response.headers);
-    } else if (error.request) {
-      console.log(error.request);
-    } else {
-      console.log('Error', error.message);
-    }
-    console.log(error.config);
-    res.sendStatus(500);
-  });
+app.post('/getKrogerLocations', async (req, res) => {
+  console.log('Received POST from Glide for getKrogerLocations');
+
+  const zip = req.body.params.zip.value;
+  const krogerToken = req.body.params.krogerToken.value;
+
+  try {
+    const locationsString = await getKrogerLocations(zip, krogerToken);
+    console.log('Locations String:', locationsString);
+    res.json({ locations: locationsString });
+  } catch (error) {
+    console.error('Error in getKrogerLocations:', error);
+    res.status(500).send({ error: 'Error fetching Kroger locations.' });
+  }
 });
 
 const port = process.env.PORT || 3000;
