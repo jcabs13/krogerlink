@@ -38,7 +38,8 @@ const getKrogerLocations = async (zip, krogerToken) => {
 
     console.log('Kroger Response:', response.data);
 
-    const locations = response.data.data.map(location => location.location.address.addressLine1);
+    // Assume that the first 3 locations returned by the API are the closest
+    const locations = response.data.data.slice(0, 3).map(location => location.location.address.addressLine1);
 
     const locationsString = locations.join(', ');
 
