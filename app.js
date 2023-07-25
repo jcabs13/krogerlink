@@ -5,21 +5,45 @@ const app = express();
 
 app.use(express.json());
 
-app.post('/getKrogerToken', (req, res) => {
+const getKrogerToken = async () => {
+  const clientId = process.env.CLIENT_ID;
+  const clientSecret = process.env.CLIENT_SECRET;
+  const scope = process.env.SCOPE;
+
+  const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+
+  try {
+    const response = await axios.post('https://api.kroger.com/v1/connect/oauth2/token', 'grant_type=client_credentials&scope=' + scope, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Basic ' + credentials
+      },
+    });
+
+    return response.data.access_token;
+  } catch (error) {
+    console.error('Error fetching Kroger API token:', error);
+    throw error;
+  }
+};
+
+app.post('/getKrogerToken', async (req, res) => {
   console.log('Received POST from Glide');
 
-  // Log the request body
   console.log('Request Body:', req.body);
 
   const rowID = req.body.params.rowID.value;
-  const text = req.body.params.zip.value;
+  const zip = req.body.params.zip.value;
 
-  if (!rowID || !text) {
-    console.error('rowID or text not provided');
+  if (!rowID || !zip) {
+    console.error('rowID or zip not provided');
     return res.sendStatus(400);
   }
 
   const token = process.env.BEARER_TOKEN;
+  const krogerToken = await getKrogerToken();
+
+  console.log('Passing locations to Glide:', locationsString);
 
   axios({
     method: 'post',
@@ -35,7 +59,7 @@ app.post('/getKrogerToken', (req, res) => {
           "kind": "set-columns-in-row",
           "tableName": "native-table-MX8xNW5WWoJhW4fwEeN7",
           "columnValues": {
-            "NqLF1": text
+            "NqLF1": krogerToken
           },
           "rowID": rowID
         }
@@ -46,15 +70,15 @@ app.post('/getKrogerToken', (req, res) => {
     res.sendStatus(200);
   }).catch((error) => {
     if (error.response) {
-      console.log(error.response.data);
-      console.log(error.response.status);
-      console.log(error.response.headers);
+      console.log('Error Response Data:', error.response.data);
+      console.log('Error Response Status:', error.response.status);
+      console.log('Error Response Headers:', error.response.headers);
     } else if (error.request) {
-      console.log(error.request);
+      console.log('Error Request:', error.request);
     } else {
-      console.log('Error', error.message);
+      console.log('Error Message:', error.message);
     }
-    console.log(error.config);
+    console.log('Error Config:', error.config);
     res.sendStatus(500);
   });
 });
