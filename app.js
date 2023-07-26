@@ -115,9 +115,10 @@ app.post('/getKrogerLocations', (req, res) => {
 
   const rowID = req.body.params.rowID?.value;
   const zip = req.body.params.zip?.value;
+  const krogerToken = req.body.params.krogerToken?.value;
 
-  if (!rowID || !zip) {
-    console.error('rowID or zip not provided');
+  if (!rowID || !zip || !krogerToken) {
+    console.error('rowID, krogerToken, or zip not provided');
     return res.sendStatus(400);
   }
 
