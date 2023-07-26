@@ -193,8 +193,8 @@ app.post('/getKrogerLocations', (req, res) => {
     });
 });
 
-const getAisle = async (krogerToken, zip) => {
-  const url = `https://api.kroger.com/v1/locations?filter.zipCode.near=${zip}&filter.limit=3`;
+const getAisle = async (term, locationID) => {
+  const url = `https://api.kroger.com/v1/products?filter.term={{TERM}}&filter.locationId={{LOCATION_ID}}`;
 
   let data;
   try {
@@ -214,25 +214,6 @@ const getAisle = async (krogerToken, zip) => {
   } catch (error) {
     console.error('Error fetching data from Kroger:', error);
     return;
-  }
-
-  if (data && Array.isArray(data.data)) {
-    let address1 = data.data[0]?.address.addressLine1; // getting the address of the first location
-    let address2 = data.data[1]?.address.addressLine1; // getting the address of the second location
-    let address3 = data.data[2]?.address.addressLine1; // getting the address of the third location
-    let ID1 = data.data[0]?.locationId; // getting the address of the first location
-    let ID2 = data.data[1]?.locationId; // getting the address of the second location
-    let ID3 = data.data[2]?.locationId; // getting the address of the third location
-
-    // constructing a single string with all three addresses
-    let addresses = `${address1}, ${ID1}, ${address2}, ${ID2}, ${address3}, ${ID3}`;
-
-    console.log('ADDRESSES:', addresses);
-
-    return addresses;
-  } else {
-    console.error('Invalid data structure from Kroger:', data);
-    return null;
   }
 };
 
@@ -254,7 +235,7 @@ app.post('/getAisle', (req, res) => {
     return res.sendStatus(400);
   }
 
-  getKrogerLocations(term, locationID)
+  getAisle(term, locationID)
     .then(addresses => {
       const token = process.env.BEARER_TOKEN;
 
