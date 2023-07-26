@@ -196,6 +196,8 @@ app.post('/getKrogerLocations', (req, res) => {
 const getAisle = async (term, locID, token) => {
   const url = `https://api.kroger.com/v1/products?filter.term=${term}&filter.locationId=${locID}&filter.limit=1`;
 
+  let data;  // define data variable outside try-catch block
+
   try {
     const response = await fetch(url, {
       method: 'GET',
@@ -216,10 +218,7 @@ const getAisle = async (term, locID, token) => {
   }
 
   if (data && Array.isArray(data.data)) {
-    let foundaisle = data.data[0]?.aisleLocations.description; // getting the address of the first location
-
-    // constructing a single string with all three addresses
-    let aisle = `${foundaisle}`;
+    let aisle = data.data[0]?.aisleLocations[0]?.description; // get the description of the first location
 
     console.log('Returning Aisle Location:', aisle);
 
@@ -229,6 +228,7 @@ const getAisle = async (term, locID, token) => {
     return null;
   }
 };
+
 
 getAisle("your-product-term", "your-location-id", "your-token").then(aisle => console.log(aisle));
 
