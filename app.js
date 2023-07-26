@@ -194,9 +194,8 @@ app.post('/getKrogerLocations', (req, res) => {
 });
 
 const getAisle = async (term, locID, token) => {
-  const url = `https://api.kroger.com/v1/products?filter.term={{term}}&filter.locationId={{locID}}`;
+  const url = `https://api.kroger.com/v1/products?filter.term=${term}&filter.locationId=${locID}`;
 
-  let data;
   try {
     const response = await fetch(url, {
       method: 'GET',
@@ -210,12 +209,25 @@ const getAisle = async (term, locID, token) => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    data = await response.json();
+    const data = await response.json();
+
+    console.log(data);  // log the complete response data
+
+    // Assuming the aisle information is located in a property 'aisle' of each product item.
+    // You should modify this according to the actual structure of the API response
+    if(data && data.length > 0) {
+      return data[0].aisle;
+    }
+    return 'Product not found';
+
   } catch (error) {
     console.error('Error fetching data from Kroger:', error);
-    return;
+    return 'Error fetching data from Kroger';
   }
 };
+
+getAisle("your-product-term", "your-location-id", "your-token").then(aisle => console.log(aisle));
+
 
 app.post('/getAisle', (req, res) => {
   console.log('Received POST from Glide');
