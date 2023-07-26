@@ -193,8 +193,8 @@ app.post('/getKrogerLocations', (req, res) => {
     });
 });
 
-const getAisle = async (term, locationID) => {
-  const url = `https://api.kroger.com/v1/products?filter.term={{TERM}}&filter.locationId={{LOCATION_ID}}`;
+const getAisle = async (term, locID) => {
+  const url = `https://api.kroger.com/v1/products?filter.term={{term}}&filter.locationId={{locID}}`;
 
   let data;
   try {
@@ -224,18 +224,18 @@ app.post('/getAisle', (req, res) => {
   console.log('Request Body:', req.body);
 
   const term = req.body.params.term?.value;
-  const locationID = req.body.params.locationID?.value;
+  const locationID = req.body.params.locID?.value;
   const locationID = req.body.params.rowID?.value;
 
   console.log('INPUT term:', term);
-  console.log('INPUT locationID:', locationID);
+  console.log('INPUT locationID:', locID);
 
-  if (!term || !locationID) {
+  if (!term || !locID) {
     console.error('term of locationID not provided');
     return res.sendStatus(400);
   }
 
-  getAisle(term, locationID)
+  getAisle(term, locID)
     .then(addresses => {
       const token = process.env.BEARER_TOKEN;
 
