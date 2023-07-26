@@ -1,4 +1,4 @@
-//test
+//token and location webhooks working
 require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
@@ -129,11 +129,6 @@ const getKrogerLocations = async (krogerToken, zip) => {
   }
 };
 
-
-
-
-
-
 app.post('/getKrogerLocations', (req, res) => {
   console.log('Received POST from Glide');
 
@@ -197,7 +192,6 @@ app.post('/getKrogerLocations', (req, res) => {
       res.sendStatus(500);
     });
 });
-
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Server listening on port ${port}`));
