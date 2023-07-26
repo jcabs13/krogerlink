@@ -111,16 +111,17 @@ const getKrogerLocations = async (krogerToken, zip) => {
   }
 
   if (data && Array.isArray(data.locations)) {
-    let addresses = data.locations.map(location =>
-      `${location.name}, ${location.address}, ${location.city}, ${location.state}, ${location.zip}`
+    let locationInfo = data.locations.map(location =>
+      `locationId: ${location.locationId}, address: ${location.address}`
     );
 
-    return addresses.join(" ; ");
+    return locationInfo;
   } else {
     console.error('Invalid data structure from Kroger:', data);
     return null;
   }
 };
+
 
 
 
