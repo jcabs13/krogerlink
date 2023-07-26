@@ -89,26 +89,34 @@ app.post('/getKrogerToken', (req, res) => {
 const getKrogerLocations = async (krogerToken, zip) => {
   const url = `https://api.kroger.com/v1/locations?filter.zipCode.near=${zip}&filter.limit=3&filter.chain=Kroger`;
   
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${krogerToken}`,
-      'Content-Type': 'application/json',
-    },
-  });
+  let data;
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${krogerToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
 
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    data = await response.json();
+    console.log('DATA FROM KROGER:', data);
+  } catch (error) {
+    console.error('Error fetching data from Kroger:', error);
+    return;
   }
 
-  const data = await response.json();
-  
   let addresses = data.locations.map(location => 
     `${location.name}, ${location.address}, ${location.city}, ${location.state}, ${location.zip}`
   );
 
   return addresses.join(" ; ");
 };
+
 
 app.post('/getKrogerLocations', (req, res) => {
   console.log('Received POST from Glide');
