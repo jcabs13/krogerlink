@@ -111,9 +111,7 @@ const getKrogerLocations = async (krogerToken, zip) => {
   }
 
   if (data && Array.isArray(data.locations)) {
-    let locationInfo = data.locations.map(location =>
-      `locationId: ${location.locationId}, address: ${location.address}`
-    );
+    let locationInfo = data.locations.map(location => location.address).join(", ");
 
     return locationInfo;
   } else {
@@ -121,6 +119,7 @@ const getKrogerLocations = async (krogerToken, zip) => {
     return null;
   }
 };
+
 
 
 
