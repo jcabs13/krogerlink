@@ -110,9 +110,9 @@ const getKrogerLocations = async (krogerToken, zip) => {
   }
 
   if (data && Array.isArray(data.data)) {
-    let address1 = data.data[0]?.address; // getting the address of the first location
-    let address2 = data.data[1]?.address; // getting the address of the second location
-    let address3 = data.data[2]?.address; // getting the address of the third location
+    let address1 = JSON.stringify(data.data[0]?.address); // getting the address of the first location
+    let address2 = JSON.stringify(data.data[1]?.address); // getting the address of the second location
+    let address3 = JSON.stringify(data.data[2]?.address); // getting the address of the third location
 
     // constructing a single string with all three addresses
     let addresses = `${address1}, ${address2}, ${address3}`;
