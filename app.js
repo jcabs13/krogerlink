@@ -193,5 +193,110 @@ app.post('/getKrogerLocations', (req, res) => {
     });
 });
 
+const getAisle = async (krogerToken, zip) => {
+  const url = `https://api.kroger.com/v1/locations?filter.zipCode.near=${zip}&filter.limit=3`;
+
+  let data;
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${krogerToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    data = await response.json();
+  } catch (error) {
+    console.error('Error fetching data from Kroger:', error);
+    return;
+  }
+
+  if (data && Array.isArray(data.data)) {
+    let address1 = data.data[0]?.address.addressLine1; // getting the address of the first location
+    let address2 = data.data[1]?.address.addressLine1; // getting the address of the second location
+    let address3 = data.data[2]?.address.addressLine1; // getting the address of the third location
+    let ID1 = data.data[0]?.locationId; // getting the address of the first location
+    let ID2 = data.data[1]?.locationId; // getting the address of the second location
+    let ID3 = data.data[2]?.locationId; // getting the address of the third location
+
+    // constructing a single string with all three addresses
+    let addresses = `${address1}, ${ID1}, ${address2}, ${ID2}, ${address3}, ${ID3}`;
+
+    console.log('ADDRESSES:', addresses);
+
+    return addresses;
+  } else {
+    console.error('Invalid data structure from Kroger:', data);
+    return null;
+  }
+};
+
+app.post('/getAisle', (req, res) => {
+  console.log('Received POST from Glide');
+
+  // Log the request body
+  console.log('Request Body:', req.body);
+
+  const term = req.body.params.term?.value;
+  const locationID = req.body.params.locationID?.value;
+
+  console.log('INPUT term:', term);
+  console.log('INPUT locationID:', locationID);
+
+  if (!term || !locationID) {
+    console.error('term of locationID not provided');
+    return res.sendStatus(400);
+  }
+
+  getKrogerLocations(term, locationID)
+    .then(addresses => {
+      const token = process.env.BEARER_TOKEN;
+
+      return axios({
+        method: 'post',
+        url: 'https://api.glideapp.io/api/function/mutateTables',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        data: {
+          "appID": "mtVYx3j3ot4FzRCdp3q4",
+          "mutations": [
+            {
+              "kind": "set-columns-in-row",
+              "tableName": "native-table-MX8xNW5WWoJhW4fwEeN7",
+              "columnValues": {
+                "HenO1": "TestAisle"
+              },
+              "rowID": rowID
+            }
+          ]
+        }
+      });
+    })
+    .then(response => {
+      console.log(response.data);
+      res.sendStatus(200);
+    })
+    .catch(error => {
+      if (error.response) {
+        console.log(error.response.data);
+        console.log(error.response.status);
+        console.log(error.response.headers);
+      } else if (error.request) {
+        console.log(error.request);
+      } else {
+        console.log('Error', error.message);
+      }
+      console.log(error.config);
+      res.sendStatus(500);
+    });
+});
+
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Server listening on port ${port}`));
