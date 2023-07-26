@@ -117,9 +117,9 @@ app.post('/getKrogerLocations', (req, res) => {
   const zip = req.body.params.zip?.value;
   const krogerToken = req.body.params.krogerToken?.value;
 
-  console.log('INPUTrowID:', req.body.params.rowID?.value);
-  console.log('INPUTkrogerToken:', req.body.params.krogerToken?.value);
-  console.log('INPUTzip:', req.body.params.zip?.value);
+  console.log('INPUTrowID:', rowID);
+  console.log('INPUTkrogerToken:', zip);
+  console.log('INPUTzip:', krogerToken);
 
 
   if (!rowID || !zip || !krogerToken) {
