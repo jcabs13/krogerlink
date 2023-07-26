@@ -27,27 +27,6 @@ const getKrogerToken = () => {
     });
 };
 
-const getKrogerLocations = () => {
-  const clientId = process.env.CLIENT_ID;
-  const clientSecret = process.env.CLIENT_SECRET;
-  const scope = process.env.SCOPE; // Adjust as per your requirements
-
-  // Base64 encoding of clientId:clientSecret
-  const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
-
-  return axios.post('https://api.kroger.com/v1/connect/oauth2/token', 'grant_type=client_credentials&scope=' + scope, {
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Authorization': 'Basic ' + credentials
-    },
-  })
-    .then(response => response.data.access_token)
-    .catch(error => {
-      console.error('Error fetching Kroger API token:', error);
-      throw error;
-    });
-};
-
 app.post('/getKrogerToken', (req, res) => {
   console.log('Received POST from Glide');
 
@@ -107,6 +86,30 @@ app.post('/getKrogerToken', (req, res) => {
     });
 });
 
+const getKrogerLocations = async (krogerToken, zip) => {
+  const url = `https://api.kroger.com/v1/locations?filter.zipCode.near=${zip}&filter.limit=3&filter.chain=Kroger`;
+  
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${krogerToken}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  const data = await response.json();
+  
+  let addresses = data.locations.map(location => 
+    `${location.name}, ${location.address}, ${location.city}, ${location.state}, ${location.zip}`
+  );
+
+  return addresses.join(" ; ");
+};
+
 app.post('/getKrogerLocations', (req, res) => {
   console.log('Received POST from Glide');
 
@@ -118,17 +121,16 @@ app.post('/getKrogerLocations', (req, res) => {
   const krogerToken = req.body.params.krogerToken?.value;
 
   console.log('INPUTrowID:', rowID);
-  console.log('INPUTkrogerToken:', zip);
-  console.log('INPUTzip:', krogerToken);
-
+  console.log('INPUTzip:', zip);
+  console.log('INPUTkrogerToken:', krogerToken);
 
   if (!rowID || !zip || !krogerToken) {
     console.error('rowID, krogerToken, or zip not provided');
     return res.sendStatus(400);
   }
 
-  getKrogerLocations()
-    .then(krogerToken => {
+  getKrogerLocations(krogerToken, zip)
+    .then(addresses => {
       const token = process.env.BEARER_TOKEN;
 
       return axios({
@@ -145,7 +147,7 @@ app.post('/getKrogerLocations', (req, res) => {
               "kind": "set-columns-in-row",
               "tableName": "native-table-MX8xNW5WWoJhW4fwEeN7",
               "columnValues": {
-                "5gQpv": krogerToken
+                "5gQpv": addresses
               },
               "rowID": rowID
             }
@@ -171,7 +173,6 @@ app.post('/getKrogerLocations', (req, res) => {
       res.sendStatus(500);
     });
 });
-
 
 
 const port = process.env.PORT || 3000;
