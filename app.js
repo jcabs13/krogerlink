@@ -244,6 +244,7 @@ app.post('/getAisle', (req, res) => {
 
   const term = req.body.params.term?.value;
   const locationID = req.body.params.locationID?.value;
+  const locationID = req.body.params.rowID?.value;
 
   console.log('INPUT term:', term);
   console.log('INPUT locationID:', locationID);
