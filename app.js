@@ -224,11 +224,11 @@ app.post('/getAisle', (req, res) => {
   console.log('Request Body:', req.body);
 
   const term = req.body.params.term?.value;
-  const locationID = req.body.params.locID?.value;
+  const locID = req.body.params.locID?.value;
   const rowID = req.body.params.rowID?.value;
 
   console.log('INPUT term:', term);
-  console.log('INPUT locationID:', locID);
+  console.log('INPUT locID:', locID);
 
   if (!term || !locID) {
     console.error('term of locationID not provided');
