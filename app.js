@@ -229,10 +229,6 @@ const getAisle = async (term, locID, token) => {
   }
 };
 
-
-getAisle("your-product-term", "your-location-id", "your-token").then(aisle => console.log(aisle));
-
-
 app.post('/getAisle', (req, res) => {
   console.log('Received POST from Glide');
 
