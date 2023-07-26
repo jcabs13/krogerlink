@@ -194,7 +194,7 @@ app.post('/getKrogerLocations', (req, res) => {
 });
 
 const getAisle = async (term, locID, token) => {
-  const url = `https://api.kroger.com/v1/products?filter.term=${term}&filter.locationId=${locID}`;
+  const url = `https://api.kroger.com/v1/products?filter.term=${term}&filter.locationId=${locID}&filter.limit=1`;
 
   try {
     const response = await fetch(url, {
