@@ -127,7 +127,7 @@ app.post('/getKrogerLocations', (req, res) => {
     return res.sendStatus(400);
   }
 
-  getKrogerToken()
+  getKrogerLocations()
     .then(krogerToken => {
       const token = process.env.BEARER_TOKEN;
 
@@ -145,7 +145,7 @@ app.post('/getKrogerLocations', (req, res) => {
               "kind": "set-columns-in-row",
               "tableName": "native-table-MX8xNW5WWoJhW4fwEeN7",
               "columnValues": {
-                "NqLF1": krogerToken
+                "5gQpv": krogerToken
               },
               "rowID": rowID
             }
