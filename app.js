@@ -209,20 +209,24 @@ const getAisle = async (term, locID, token) => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data = await response.json();
-
-    console.log(data);  // log the complete response data
-
-    // Assuming the aisle information is located in a property 'aisle' of each product item.
-    // You should modify this according to the actual structure of the API response
-    if(data && data.length > 0) {
-      return data[0].aisle;
-    }
-    return 'Product not found';
-
+    data = await response.json();
   } catch (error) {
     console.error('Error fetching data from Kroger:', error);
-    return 'Error fetching data from Kroger';
+    return;
+  }
+
+  if (data && Array.isArray(data.data)) {
+    let aisle = data.data[0]?.aisleLocations; // getting the address of the first location
+
+    // constructing a single string with all three addresses
+    let addresses = `${aisle}`;
+
+    console.log('Returning Aisle Location:', aisle);
+
+    return aisle;
+  } else {
+    console.error('Invalid data structure from Kroger:', data);
+    return null;
   }
 };
 
@@ -266,7 +270,7 @@ app.post('/getAisle', (req, res) => {
               "kind": "set-columns-in-row",
               "tableName": "native-table-MX8xNW5WWoJhW4fwEeN7",
               "columnValues": {
-                "HenO1": "TestAisle"
+                "HenO1": aisle
               },
               "rowID": rowID
             }
