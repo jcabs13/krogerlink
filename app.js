@@ -216,7 +216,7 @@ const getAisle = async (term, locID, token) => {
   }
 
   if (data && Array.isArray(data.data)) {
-    let aisle = data.data[0]?.aisleLocations; // getting the address of the first location
+    let aisle = data.data[0]?.aisleLocations.description; // getting the address of the first location
 
     // constructing a single string with all three addresses
     let addresses = `${aisle}`;
