@@ -216,10 +216,10 @@ const getAisle = async (term, locID, token) => {
   }
 
   if (data && Array.isArray(data.data)) {
-    let aisle = data.data[0]?.aisleLocations.description; // getting the address of the first location
+    let foundaisle = data.data[0]?.aisleLocations.description; // getting the address of the first location
 
     // constructing a single string with all three addresses
-    let addresses = `${aisle}`;
+    let aisle = `${foundaisle}`;
 
     console.log('Returning Aisle Location:', aisle);
 
