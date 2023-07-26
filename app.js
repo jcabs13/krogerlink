@@ -88,7 +88,7 @@ app.post('/getKrogerToken', (req, res) => {
 
 const getKrogerLocations = async (krogerToken, zip) => {
   const url = `https://api.kroger.com/v1/locations?filter.zipCode.near=${zip}&filter.limit=3&filter.chain=Kroger`;
-  
+
   let data;
   try {
     const response = await fetch(url, {
@@ -110,12 +110,18 @@ const getKrogerLocations = async (krogerToken, zip) => {
     return;
   }
 
-  let addresses = data.locations.map(location => 
-    `${location.name}, ${location.address}, ${location.city}, ${location.state}, ${location.zip}`
-  );
+  if (data && Array.isArray(data.locations)) {
+    let addresses = data.locations.map(location =>
+      `${location.name}, ${location.address}, ${location.city}, ${location.state}, ${location.zip}`
+    );
 
-  return addresses.join(" ; ");
+    return addresses.join(" ; ");
+  } else {
+    console.error('Invalid data structure from Kroger:', data);
+    return null;
+  }
 };
+
 
 
 app.post('/getKrogerLocations', (req, res) => {
