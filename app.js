@@ -104,21 +104,28 @@ const getKrogerLocations = async (krogerToken, zip) => {
     }
 
     data = await response.json();
-    console.log('DATA FROM KROGER:', data);
   } catch (error) {
     console.error('Error fetching data from Kroger:', error);
     return;
   }
 
-  if (data && Array.isArray(data.locations)) {
-    let locationInfo = data.locations.map(location => location.address).join(", ");
+  if (data && Array.isArray(data.data)) {
+    let address1 = data.data[0]?.address; // getting the address of the first location
+    let address2 = data.data[1]?.address; // getting the address of the second location
+    let address3 = data.data[2]?.address; // getting the address of the third location
 
-    return locationInfo;
+    // constructing a single string with all three addresses
+    let addresses = `${address1.street}, ${address1.city}, ${address1.state} ${address1.zip}, ${address2.street}, ${address2.city}, ${address2.state} ${address2.zip}, ${address3.street}, ${address3.city}, ${address3.state} ${address3.zip}`;
+
+    console.log('ADDRESSES:', addresses);
+
+    return addresses;
   } else {
     console.error('Invalid data structure from Kroger:', data);
     return null;
   }
 };
+
 
 
 
