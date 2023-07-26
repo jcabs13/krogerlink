@@ -87,7 +87,7 @@ app.post('/getKrogerToken', (req, res) => {
 });
 
 const getKrogerLocations = async (krogerToken, zip) => {
-  const url = `https://api.kroger.com/v1/locations?filter.zipCode.near=${zip}&filter.limit=3;
+  const url = `https://api.kroger.com/v1/locations?filter.zipCode.near=${zip}&filter.limit=3`;
 
   let data;
   try {
