@@ -249,7 +249,7 @@ app.post('/getAisle', (req, res) => {
   }
 
   getAisle(term, locID, token)
-    .then(addresses => {
+    .then(aisle => {
       const token = process.env.BEARER_TOKEN;
 
       return axios({
