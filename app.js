@@ -226,7 +226,7 @@ app.post('/getAisle', (req, res) => {
   const term = req.body.params.term?.value;
   const locID = req.body.params.locID?.value;
   const rowID = req.body.params.rowID?.value;
-  const rowID = req.body.params.krogerToken?.value;
+  const krogerToken = req.body.params.krogerToken?.value;
 
   console.log('INPUT term:', term);
   console.log('INPUT locID:', locID);
