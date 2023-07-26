@@ -115,7 +115,7 @@ const getKrogerLocations = async (krogerToken, zip) => {
     let address3 = data.data[2]?.address; // getting the address of the third location
 
     // constructing a single string with all three addresses
-    let addresses = `${address1.street}, ${address1.city}, ${address1.state} ${address1.zip}, ${address2.street}, ${address2.city}, ${address2.state} ${address2.zip}, ${address3.street}, ${address3.city}, ${address3.state} ${address3.zip}`;
+    let addresses = `${address1}, ${address2}, ${address3}`;
 
     console.log('ADDRESSES:', addresses);
 
