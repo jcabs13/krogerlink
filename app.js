@@ -263,6 +263,9 @@ app.post('/getAisle', async (req, res) => {
     }
   }
 
+  // Convert the array into a string
+  aisles = aisles.join('///');
+
   const bearerToken = process.env.BEARER_TOKEN;
 
   axios({
@@ -304,6 +307,7 @@ app.post('/getAisle', async (req, res) => {
     res.sendStatus(500);
   });
 });
+
 
 
 
