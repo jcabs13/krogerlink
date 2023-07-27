@@ -1,4 +1,4 @@
-//everything works
+//token and location webhooks working
 require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
