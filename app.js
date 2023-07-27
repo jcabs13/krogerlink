@@ -258,36 +258,17 @@ app.post('/getAisle', async (req, res) => {
   }
 
   let aisles = [];
-  for (const term of terms) {
-    try {
-      let aisle = await getAisle(term, locID, token);
-      aisles.push(aisle);
-    } catch (error) {
-      console.error('Error getting aisle for term:', term, error);
-      res.sendStatus(500);
-      return;
-    }
-  }
-
   let categories = [];
-  for (const term of terms) {
-    try {
-      let category = await getAisle(term, locID, token);
-      categories.push(category);
-    } catch (error) {
-      console.error('Error getting category for term:', term, error);
-      res.sendStatus(500);
-      return;
-    }
-  }
-
   let images = [];
+
   for (const term of terms) {
     try {
-      let image = await getAisle(term, locID, token);
+      let { aisle, category, image } = await getAisle(term, locID, token);
+      aisles.push(aisle);
+      categories.push(category);
       images.push(image);
     } catch (error) {
-      console.error('Error getting image for term:', term, error);
+      console.error('Error getting data for term:', term, error);
       res.sendStatus(500);
       return;
     }
@@ -295,6 +276,8 @@ app.post('/getAisle', async (req, res) => {
 
   // Convert the array into a string
   aisles = aisles.join('///');
+  categories = categories.join('///');
+  images = images.join('///');
 
   const bearerToken = process.env.BEARER_TOKEN;
 
@@ -339,6 +322,7 @@ app.post('/getAisle', async (req, res) => {
     res.sendStatus(500);
   });
 });
+
 
 
 
