@@ -219,11 +219,16 @@ const getAisle = async (term, locID, token) => {
 
   if (data && Array.isArray(data.data)) {
     let aisle = data.data[0]?.aisleLocations[0]?.description; // get the description of the first location
+    let category = data.data[0]?.categories[0]?.description;
+    let image = data.data[0]?.images[0]?.description;
+
 
     console.log('Returning Aisle Location:', aisle);
     console.log('All Item Data:', data);
 
     return aisle;
+    return category;
+    return image;
   } else {
     console.error('Invalid data structure from Kroger:', data);
     return null;
@@ -264,6 +269,30 @@ app.post('/getAisle', async (req, res) => {
     }
   }
 
+  let categories = [];
+  for (const term of terms) {
+    try {
+      let category = await getAisle(term, locID, token);
+      categories.push(category);
+    } catch (error) {
+      console.error('Error getting category for term:', term, error);
+      res.sendStatus(500);
+      return;
+    }
+  }
+
+  let images = [];
+  for (const term of terms) {
+    try {
+      let image = await getAisle(term, locID, token);
+      images.push(image);
+    } catch (error) {
+      console.error('Error getting image for term:', term, error);
+      res.sendStatus(500);
+      return;
+    }
+  }
+
   // Convert the array into a string
   aisles = aisles.join('///');
 
@@ -284,6 +313,8 @@ app.post('/getAisle', async (req, res) => {
           "tableName": "native-table-MX8xNW5WWoJhW4fwEeN7",
           "columnValues": {
             "HenO1": aisles
+            "5vQzp": categories
+            "CNtmj": images
           },
           "rowID": rowID
         }
