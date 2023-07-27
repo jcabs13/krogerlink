@@ -221,7 +221,6 @@ const getAisle = async (term, locID, token) => {
     let aisle = data.data[0]?.aisleLocations[0]?.description; // get the description of the first location
 
     console.log('Returning Aisle Location:', aisle);
-    console.log('All Item Data:', data);
 
     return aisle;
   } else {
