@@ -193,52 +193,19 @@ app.post('/getKrogerLocations', (req, res) => {
     });
 });
 
-const getAisle = async (term, locID, token) => {
-  const url = `https://api.kroger.com/v1/products?filter.term=${term}&filter.locationId=${locID}&filter.limit=1`;
-
-  let data;  // define data variable outside try-catch block
-
-  try {
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    data = await response.json();
-  } catch (error) {
-    console.error('Error fetching data from Kroger:', error);
-    return;
-  }
-
-  if (data && Array.isArray(data.data)) {
-    let aisle = data.data[0]?.aisleLocations[0]?.description; // get the description of the first location
-
-    console.log('Returning Aisle Location:', aisle);
-
-    return aisle;
-  } else {
-    console.error('Invalid data structure from Kroger:', data);
-    return null;
-  }
-};
-
 app.post('/getAisle', async (req, res) => {
   console.log('Received POST from Glide');
 
   // Log the request body
   console.log('Request Body:', req.body);
 
-  const terms = req.body.params.terms?.value;
+  let terms = req.body.params.terms?.value; 
   const locID = req.body.params.locID?.value;
   const token = req.body.params.token?.value;
   const rowID = req.body.params.rowID?.value;
+
+  // Convert the string into an array
+  terms = terms.split('///');
 
   console.log('INPUT terms:', terms);
   console.log('INPUT locID:', locID);
@@ -301,6 +268,7 @@ app.post('/getAisle', async (req, res) => {
     res.sendStatus(500);
   });
 });
+
 
 
 const port = process.env.PORT || 3000;
