@@ -199,19 +199,18 @@ const getAisle = async (term, locID, token) => {
   let data;  // define data variable outside try-catch block
 
   try {
-    const response = await fetch(url, {
-      method: 'GET',
+    const response = await axios.get(url, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
     });
 
-    if (!response.ok) {
+    if (response.status !== 200) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    data = await response.json();
+    data = response.data;
   } catch (error) {
     console.error('Error fetching data from Kroger:', error);
     return;
@@ -228,10 +227,12 @@ const getAisle = async (term, locID, token) => {
     console.log('All Item Data:', data);
 
     return { aisle, category, image };
-} else {
+  } else {
     console.error('Invalid data structure from Kroger:', data);
     return null;
-}
+  }
+};
+
 
 
 app.post('/getAisle', async (req, res) => {
