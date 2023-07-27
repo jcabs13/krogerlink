@@ -260,21 +260,23 @@ app.post('/getAisle', async (req, res) => {
   let aisles = [];
   let categories = [];
   let images = [];
-
   for (const term of terms) {
     try {
-      let { aisle, category, image } = await getAisle(term, locID, token);
-      aisles.push(aisle);
-      categories.push(category);
-      images.push(image);
+      let response = await getAisle(term, locID, token);
+
+      console.log('Response:', response); // Log the entire response here
+
+      aisles.push(response.aisle);
+      categories.push(response.category);
+      images.push(response.image);
     } catch (error) {
-      console.error('Error getting data for term:', term, error);
+      console.error('Error getting aisle for term:', term, error);
       res.sendStatus(500);
       return;
     }
   }
 
-  // Convert the array into a string
+  // Convert the arrays into strings
   aisles = aisles.join('///');
   categories = categories.join('///');
   images = images.join('///');
@@ -322,6 +324,7 @@ app.post('/getAisle', async (req, res) => {
     res.sendStatus(500);
   });
 });
+
 
 
 
