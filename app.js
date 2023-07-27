@@ -219,21 +219,20 @@ const getAisle = async (term, locID, token) => {
 
   if (data && Array.isArray(data.data)) {
     let aisle = data.data[0]?.aisleLocations[0]?.description; // get the description of the first location
-    let category = data.data[0]?.categories[0]?.description;
-    let image = data.data[0]?.images[0]?.description;
-
+    let category = data.data[0]?.categories[0];
+    let image = data.data[0]?.images[0];
 
     console.log('Returning Aisle Location:', aisle);
+    console.log('Returning Category:', category);
+    console.log('Returning Image:', image);
     console.log('All Item Data:', data);
 
-    return aisle;
-    return category;
-    return image;
-  } else {
+    return { aisle, category, image };
+} else {
     console.error('Invalid data structure from Kroger:', data);
     return null;
-  }
-};
+}
+
 
 app.post('/getAisle', async (req, res) => {
   console.log('Received POST from Glide');
