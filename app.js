@@ -229,87 +229,69 @@ const getAisle = async (term, locID, token) => {
   }
 };
 
-app.post('/getAisle', async (req, res) => {
+app.post('/getAisle', (req, res) => {
   console.log('Received POST from Glide');
 
   // Log the request body
   console.log('Request Body:', req.body);
 
-  let terms = req.body.params.terms?.value; 
+  const term = req.body.params.term?.value;
   const locID = req.body.params.locID?.value;
   const token = req.body.params.token?.value;
   const rowID = req.body.params.rowID?.value;
 
-  // Convert the string into an array
-  terms = terms.split('///');
-
-  console.log('INPUT terms:', terms);
+  console.log('INPUT term:', term);
   console.log('INPUT locID:', locID);
 
-  if (!terms || terms.length === 0 || !locID) {
-    console.error('terms or locationID not provided');
+  if (!term || !locID) {
+    console.error('term of locationID not provided');
     return res.sendStatus(400);
   }
 
-  let aisles = [];
-  for (const term of terms) {
-    try {
-      let aisle = await getAisle(term, locID, token);
-      aisles.push(aisle);
-    } catch (error) {
-      console.error('Error getting aisle for term:', term, error);
-      res.sendStatus(500);
-      return;
-    }
-  }
+  getAisle(term, locID, token)
+    .then(aisle => {
+      const token = process.env.BEARER_TOKEN;
 
-  // Convert the array into a string
-  aisles = aisles.join('///');
-
-  const bearerToken = process.env.BEARER_TOKEN;
-
-  axios({
-    method: 'post',
-    url: 'https://api.glideapp.io/api/function/mutateTables',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${bearerToken}`,
-    },
-    data: {
-      "appID": "mtVYx3j3ot4FzRCdp3q4",
-      "mutations": [
-        {
-          "kind": "set-columns-in-row",
-          "tableName": "native-table-MX8xNW5WWoJhW4fwEeN7",
-          "columnValues": {
-            "HenO1": aisles
-          },
-          "rowID": rowID
+      return axios({
+        method: 'post',
+        url: 'https://api.glideapp.io/api/function/mutateTables',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        data: {
+          "appID": "mtVYx3j3ot4FzRCdp3q4",
+          "mutations": [
+            {
+              "kind": "set-columns-in-row",
+              "tableName": "native-table-MX8xNW5WWoJhW4fwEeN7",
+              "columnValues": {
+                "HenO1": aisle
+              },
+              "rowID": rowID
+            }
+          ]
         }
-      ]
-    }
-  })
-  .then(response => {
-    console.log(response.data);
-    res.sendStatus(200);
-  })
-  .catch(error => {
-    if (error.response) {
-      console.log(error.response.data);
-      console.log(error.response.status);
-      console.log(error.response.headers);
-    } else if (error.request) {
-      console.log(error.request);
-    } else {
-      console.log('Error', error.message);
-    }
-    console.log(error.config);
-    res.sendStatus(500);
-  });
+      });
+    })
+    .then(response => {
+      console.log(response.data);
+      res.sendStatus(200);
+    })
+    .catch(error => {
+      if (error.response) {
+        console.log(error.response.data);
+        console.log(error.response.status);
+        console.log(error.response.headers);
+      } else if (error.request) {
+        console.log(error.request);
+      } else {
+        console.log('Error', error.message);
+      }
+      console.log(error.config);
+      res.sendStatus(500);
+    });
 });
-
-
-
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Server listening on port ${port}`));
