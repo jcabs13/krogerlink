@@ -381,7 +381,7 @@ const getProductOptions = async (term, locID, token) => {
     console.log('Returning Aisle Location:', aisle);
     console.log('Returning Category:', category);
     console.log('Returning Image URL:', smallImage);
-    console.log('Returning ProductID:', productId
+    console.log('Returning ProductID:', productId);
     console.log('All Item Data:', data);
 
     return { aisle, category, image: smallImage, productId };
@@ -459,7 +459,7 @@ app.post('/getProductOptions', async (req, res) => {
           "columnValues": {
             "F0cNY": aisles,
             "xHKW5": categories,
-            "W89pM": images
+            "W89pM": images,
             "Oy9mB": productIds
           },
           "rowID": rowID
@@ -485,6 +485,7 @@ app.post('/getProductOptions', async (req, res) => {
     res.sendStatus(500);
   });
 });
+
 
 
 
