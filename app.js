@@ -337,8 +337,8 @@ app.post('/getAisle', async (req, res) => {
   });
 });
 
-//getsingleaisle
-const getSingleAisle = async (term, locID, token) => {
+//getProductOptions
+const getProductOptions = async (term, locID, token) => {
   const url = `https://api.kroger.com/v1/products?filter.term=${term}&filter.locationId=${locID}&filter.limit=1`;
 
   let data;  // define data variable outside try-catch block
@@ -365,6 +365,7 @@ const getSingleAisle = async (term, locID, token) => {
     let aisle = data.data[0]?.aisleLocations[0]?.description; // get the description of the first location
     let category = data.data[0]?.categories[0];
     let images = data.data[0]?.images[0];
+    let productId = data.data[0]?.productId;
 
     // Find the image where size is 'small'
     let smallImage;
@@ -380,16 +381,17 @@ const getSingleAisle = async (term, locID, token) => {
     console.log('Returning Aisle Location:', aisle);
     console.log('Returning Category:', category);
     console.log('Returning Image URL:', smallImage);
+    console.log('Returning ProductID:', productId
     console.log('All Item Data:', data);
 
-    return { aisle, category, image: smallImage };
+    return { aisle, category, image: smallImage, productId };
   } else {
     console.error('Invalid data structure from Kroger:', data);
     return null;
   }
 };
 
-app.post('/getSingleAisle', async (req, res) => {
+app.post('/getProductOptions', async (req, res) => {
   console.log('Received POST from Glide');
 
   // Log the request body
@@ -414,15 +416,18 @@ app.post('/getSingleAisle', async (req, res) => {
   let aisles = [];
   let categories = [];
   let images = [];
+  let productIds = [];
+
   for (const term of terms) {
     try {
-      let response = await getAisle(term, locID, token);
+      let response = await getProductOptions(term, locID, token);
 
       console.log('Response:', response); // Log the entire response here
 
       aisles.push(response.aisle);
       categories.push(response.category);
       images.push(response.image);
+      productIds.push(response.productId);
     } catch (error) {
       console.error('Error getting aisle for term:', term, error);
       res.sendStatus(500);
@@ -434,6 +439,7 @@ app.post('/getSingleAisle', async (req, res) => {
   aisles = aisles.join('///');
   categories = categories.join('///');
   images = images.join('///');
+  productIds = productIds.join('///');
 
   const bearerToken = process.env.BEARER_TOKEN;
 
@@ -454,6 +460,7 @@ app.post('/getSingleAisle', async (req, res) => {
             "F0cNY": aisles,
             "xHKW5": categories,
             "W89pM": images
+            "Oy9mB": productIds
           },
           "rowID": rowID
         }
