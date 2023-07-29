@@ -259,7 +259,7 @@ app.post('/getAisle', async (req, res) => {
   const rowID = req.body.params.rowID?.value;
 
   // Convert the string into an array
-  terms = terms.split('///');
+  terms = terms.split('|');
 
   console.log('INPUT terms:', terms);
   console.log('INPUT locID:', locID);
@@ -289,9 +289,9 @@ app.post('/getAisle', async (req, res) => {
   }
 
   // Convert the arrays into strings
-  aisles = aisles.join('///');
-  categories = categories.join('///');
-  images = images.join('///');
+  aisles = aisles.join('|');
+  categories = categories.join('|');
+  images = images.join('|');
 
   const bearerToken = process.env.BEARER_TOKEN;
 
@@ -408,7 +408,7 @@ app.post('/getProductOptions', async (req, res) => {
   const rowID = req.body.params.rowID?.value;
 
   // Convert the string into an array
-  terms = terms.split('///');
+  terms = terms.split('|');
 
   console.log('INPUT terms:', terms);
   console.log('INPUT locID:', locID);
@@ -428,10 +428,10 @@ app.post('/getProductOptions', async (req, res) => {
       let { aisles, categories, images, productIds } = await getProductOptions(term, locID, token);
 
       // Push joined values from arrays into all* arrays
-      allAisles.push(aisles.join('///'));
-      allCategories.push(categories.join('///'));
-      allImages.push(images.join('///'));
-      allProductIds.push(productIds.join('///'));
+      allAisles.push(aisles.join('|'));
+      allCategories.push(categories.join('|'));
+      allImages.push(images.join('|'));
+      allProductIds.push(productIds.join('|'));
     } catch (error) {
       console.error('Error getting aisle for term:', term, error);
       res.sendStatus(500);
@@ -439,11 +439,11 @@ app.post('/getProductOptions', async (req, res) => {
     }
   }
 
-  // Convert the arrays into strings with '///' separator
-  let aislesString = allAisles.join('///');
-  let categoriesString = allCategories.join('///');
-  let imagesString = allImages.join('///');
-  let productIdsString = allProductIds.join('///');
+  // Convert the arrays into strings with '|' separator
+  let aislesString = allAisles.join('|');
+  let categoriesString = allCategories.join('|');
+  let imagesString = allImages.join('|');
+  let productIdsString = allProductIds.join('|');
 
   const bearerToken = process.env.BEARER_TOKEN;
 
