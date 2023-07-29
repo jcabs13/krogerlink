@@ -455,7 +455,7 @@ app.post('/getProductOptions', async (req, res) => {
       "mutations": [
         {
           "kind": "set-columns-in-row",
-          "tableName": "native-table-1hAfIESJvWYqeZbpYjxE",
+          "tableName": "native-table-MX8xNW5WWoJhW4fwEeN7",
           "columnValues": {
             "F0cNY": aisles,
             "xHKW5": categories,
