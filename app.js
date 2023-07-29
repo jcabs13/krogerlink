@@ -339,7 +339,7 @@ app.post('/getAisle', async (req, res) => {
 
 //getProductOptions
 const getProductOptions = async (term, locID, token) => {
-  const url = `https://api.kroger.com/v1/products?filter.term=${term}&filter.locationId=${locID}&filter.limit=1`;
+  const url = `https://api.kroger.com/v1/products?filter.term=${term}&filter.locationId=${locID}&filter.limit=5`;
 
   let data;  // define data variable outside try-catch block
 
