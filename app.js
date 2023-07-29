@@ -413,12 +413,17 @@ app.post('/getProductOptions', async (req, res) => {
     return res.sendStatus(400);
   }
 
-  let aisles = [];
-  let categories = [];
-  let images = [];
-  let productIds = [];
+  let allAisles = [];
+  let allCategories = [];
+  let allImages = [];
+  let allProductIds = [];
 
   for (const term of terms) {
+    let aisles = [];
+    let categories = [];
+    let images = [];
+    let productIds = [];
+
     try {
       let response = await getProductOptions(term, locID, token);
 
@@ -433,13 +438,18 @@ app.post('/getProductOptions', async (req, res) => {
       res.sendStatus(500);
       return;
     }
+
+    allAisles.push(aisles.join('///'));
+    allCategories.push(categories.join('///'));
+    allImages.push(images.join('///'));
+    allProductIds.push(productIds.join('///'));
   }
 
   // Convert the arrays into strings
-  aisles = aisles.join('///');
-  categories = categories.join('///');
-  images = images.join('///');
-  productIds = productIds.join('///');
+  let aislesString = allAisles.join('|');
+  let categoriesString = allCategories.join('|');
+  let imagesString = allImages.join('|');
+  let productIdsString = allProductIds.join('|');
 
   const bearerToken = process.env.BEARER_TOKEN;
 
@@ -457,10 +467,10 @@ app.post('/getProductOptions', async (req, res) => {
           "kind": "set-columns-in-row",
           "tableName": "native-table-MX8xNW5WWoJhW4fwEeN7",
           "columnValues": {
-            "HenO1": aisles,
-            "5vQzp": categories,
-            "CNtmj": images,
-            "Oy9mB": productIds
+            "HenO1": aislesString,
+            "5vQzp": categoriesString,
+            "CNtmj": imagesString,
+            "Oy9mB": productIdsString
           },
           "rowID": rowID
         }
