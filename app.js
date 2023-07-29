@@ -341,7 +341,7 @@ app.post('/getAisle', async (req, res) => {
 const getProductOptions = async (term, locID, token) => {
   const url = `https://api.kroger.com/v1/products?filter.term=${term}&filter.locationId=${locID}&filter.limit=5`;
 
-  let data;  // define data variable outside try-catch block
+  let results; // define results variable outside try-catch block
 
   try {
     const response = await axios.get(url, {
@@ -355,22 +355,29 @@ const getProductOptions = async (term, locID, token) => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    data = response.data;
+    results = response.data.data; // Get the array of results
   } catch (error) {
     console.error('Error fetching data from Kroger:', error);
     return;
   }
 
-  if (data && Array.isArray(data.data)) {
-    let aisle = data.data[0]?.aisleLocations[0]?.description; // get the description of the first location
-    let category = data.data[0]?.categories[0];
-    let images = data.data[0]?.images[0];
-    let productId = data.data[0]?.productId;
+  // Prepare the arrays to hold the results per term
+  let aisles = [];
+  let categories = [];
+  let images = [];
+  let productIds = [];
+
+  // Iterate over the results for the term
+  for (let result of results) {
+    let aisle = result?.aisleLocations[0]?.description;
+    let category = result?.categories[0];
+    let image = result?.images[0];
+    let productId = result?.productId;
 
     // Find the image where size is 'small'
     let smallImage;
-    if (images?.sizes) {
-      for (let sizeObj of images.sizes) {
+    if (image?.sizes) {
+      for (let sizeObj of image.sizes) {
         if (sizeObj.size === 'small') {
           smallImage = sizeObj.url;
           break;
@@ -378,17 +385,15 @@ const getProductOptions = async (term, locID, token) => {
       }
     }
 
-    console.log('Returning Aisle Location:', aisle);
-    console.log('Returning Category:', category);
-    console.log('Returning Image URL:', smallImage);
-    console.log('Returning ProductID:', productId);
-    console.log('All Item Data:', data);
-
-    return { aisle, category, image: smallImage, productId };
-  } else {
-    console.error('Invalid data structure from Kroger:', data);
-    return null;
+    // Push each value into its respective array
+    aisles.push(aisle);
+    categories.push(category);
+    images.push(smallImage);
+    productIds.push(productId);
   }
+
+  // Return arrays with results
+  return { aisles, categories, images, productIds };
 };
 
 app.post('/getProductOptions', async (req, res) => {
@@ -397,7 +402,7 @@ app.post('/getProductOptions', async (req, res) => {
   // Log the request body
   console.log('Request Body:', req.body);
 
-  let terms = req.body.params.terms?.value; 
+  let terms = req.body.params.terms?.value;
   const locID = req.body.params.locID?.value;
   const token = req.body.params.token?.value;
   const rowID = req.body.params.rowID?.value;
@@ -413,21 +418,20 @@ app.post('/getProductOptions', async (req, res) => {
     return res.sendStatus(400);
   }
 
-  let aisles = [];
-  let categories = [];
-  let images = [];
-  let productIds = [];
+  let allAisles = [];
+  let allCategories = [];
+  let allImages = [];
+  let allProductIds = [];
 
   for (const term of terms) {
     try {
-      let response = await getProductOptions(term, locID, token);
+      let { aisles, categories, images, productIds } = await getProductOptions(term, locID, token);
 
-      console.log('Response:', response); // Log the entire response here
-
-      aisles.push(response.aisle);
-      categories.push(response.category);
-      images.push(response.image);
-      productIds.push(response.productId);
+      // Push joined values from arrays into all* arrays
+      allAisles.push(aisles.join('///'));
+      allCategories.push(categories.join('///'));
+      allImages.push(images.join('///'));
+      allProductIds.push(productIds.join('///'));
     } catch (error) {
       console.error('Error getting aisle for term:', term, error);
       res.sendStatus(500);
@@ -435,11 +439,11 @@ app.post('/getProductOptions', async (req, res) => {
     }
   }
 
-  // Convert the arrays into strings
-  aisles = aisles.join('///');
-  categories = categories.join('///');
-  images = images.join('///');
-  productIds = productIds.join('///');
+  // Convert the arrays into strings with '///' separator
+  let aislesString = allAisles.join('///');
+  let categoriesString = allCategories.join('///');
+  let imagesString = allImages.join('///');
+  let productIdsString = allProductIds.join('///');
 
   const bearerToken = process.env.BEARER_TOKEN;
 
@@ -457,10 +461,10 @@ app.post('/getProductOptions', async (req, res) => {
           "kind": "set-columns-in-row",
           "tableName": "native-table-MX8xNW5WWoJhW4fwEeN7",
           "columnValues": {
-            "HenO1": aisles,
-            "5vQzp": categories,
-            "CNtmj": images,
-            "Oy9mB": productIds
+            "HenO1": aislesString,
+            "5vQzp": categoriesString,
+            "CNtmj": imagesString,
+            "Oy9mB": productIdsString
           },
           "rowID": rowID
         }
@@ -485,6 +489,7 @@ app.post('/getProductOptions', async (req, res) => {
     res.sendStatus(500);
   });
 });
+
 
 
 
