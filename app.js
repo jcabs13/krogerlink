@@ -457,9 +457,9 @@ app.post('/getProductOptions', async (req, res) => {
           "kind": "set-columns-in-row",
           "tableName": "native-table-MX8xNW5WWoJhW4fwEeN7",
           "columnValues": {
-            "F0cNY": aisles,
-            "xHKW5": categories,
-            "W89pM": images,
+            "HenO1": aisles,
+            "5vQzp": categories,
+            "CNtmj": images,
             "Oy9mB": productIds
           },
           "rowID": rowID
