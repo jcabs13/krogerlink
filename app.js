@@ -199,18 +199,19 @@ const getAisle = async (term, locID, token) => {
   let data;  // define data variable outside try-catch block
 
   try {
-    const response = await axios.get(url, {
+    const response = await fetch(url, {
+      method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
     });
 
-    if (response.status !== 200) {
+    if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    data = response.data;
+    data = await response.json();
   } catch (error) {
     console.error('Error fetching data from Kroger:', error);
     return;
@@ -219,32 +220,18 @@ const getAisle = async (term, locID, token) => {
   if (data && Array.isArray(data.data)) {
     let aisle = data.data[0]?.aisleLocations[0]?.description; // get the description of the first location
     let category = data.data[0]?.categories[0];
-    let images = data.data[0]?.images[0];
-
-    // Find the image where size is 'small'
-    let smallImage;
-    if (images?.sizes) {
-      for (let sizeObj of images.sizes) {
-        if (sizeObj.size === 'small') {
-          smallImage = sizeObj.url;
-          break;
-        }
-      }
-    }
+    let image = data.data[0]?.images[0];
 
     console.log('Returning Aisle Location:', aisle);
     console.log('Returning Category:', category);
-    console.log('Returning Image URL:', smallImage);
+    console.log('Returning Image:', image);
     console.log('All Item Data:', data);
 
-    return { aisle, category, image: smallImage };
-  } else {
+    return { aisle, category, image };
+} else {
     console.error('Invalid data structure from Kroger:', data);
     return null;
-  }
-};
-
-
+}
 
 
 app.post('/getAisle', async (req, res) => {
@@ -270,17 +257,10 @@ app.post('/getAisle', async (req, res) => {
   }
 
   let aisles = [];
-  let categories = [];
-  let images = [];
   for (const term of terms) {
     try {
-      let response = await getAisle(term, locID, token);
-
-      console.log('Response:', response); // Log the entire response here
-
-      aisles.push(response.aisle);
-      categories.push(response.category);
-      images.push(response.image);
+      let aisle = await getAisle(term, locID, token);
+      aisles.push(aisle);
     } catch (error) {
       console.error('Error getting aisle for term:', term, error);
       res.sendStatus(500);
@@ -288,10 +268,32 @@ app.post('/getAisle', async (req, res) => {
     }
   }
 
-  // Convert the arrays into strings
+  let categories = [];
+  for (const term of terms) {
+    try {
+      let category = await getAisle(term, locID, token);
+      categories.push(category);
+    } catch (error) {
+      console.error('Error getting category for term:', term, error);
+      res.sendStatus(500);
+      return;
+    }
+  }
+
+  let images = [];
+  for (const term of terms) {
+    try {
+      let image = await getAisle(term, locID, token);
+      images.push(image);
+    } catch (error) {
+      console.error('Error getting image for term:', term, error);
+      res.sendStatus(500);
+      return;
+    }
+  }
+
+  // Convert the array into a string
   aisles = aisles.join('///');
-  categories = categories.join('///');
-  images = images.join('///');
 
   const bearerToken = process.env.BEARER_TOKEN;
 
@@ -336,8 +338,6 @@ app.post('/getAisle', async (req, res) => {
     res.sendStatus(500);
   });
 });
-
-
 
 
 
