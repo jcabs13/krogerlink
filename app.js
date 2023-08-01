@@ -259,7 +259,7 @@ app.post('/getAisle', async (req, res) => {
   const rowID = req.body.params.rowID?.value;
 
   // Convert the string into an array
-  terms = terms.split('|');
+  terms = terms.split('///');
 
   console.log('INPUT terms:', terms);
   console.log('INPUT locID:', locID);
@@ -289,9 +289,9 @@ app.post('/getAisle', async (req, res) => {
   }
 
   // Convert the arrays into strings
-  aisles = aisles.join('|');
-  categories = categories.join('|');
-  images = images.join('|');
+  aisles = aisles.join('///');
+  categories = categories.join('///');
+  images = images.join('///');
 
   const bearerToken = process.env.BEARER_TOKEN;
 
@@ -312,159 +312,6 @@ app.post('/getAisle', async (req, res) => {
             "HenO1": aisles,
             "5vQzp": categories,
             "CNtmj": images
-          },
-          "rowID": rowID
-        }
-      ]
-    }
-  })
-  .then(response => {
-    console.log(response.data);
-    res.sendStatus(200);
-  })
-  .catch(error => {
-    if (error.response) {
-      console.log(error.response.data);
-      console.log(error.response.status);
-      console.log(error.response.headers);
-    } else if (error.request) {
-      console.log(error.request);
-    } else {
-      console.log('Error', error.message);
-    }
-    console.log(error.config);
-    res.sendStatus(500);
-  });
-});
-
-//getProductOptions
-const getProductOptions = async (term, locID, token) => {
-  const url = `https://api.kroger.com/v1/products?filter.term=${term}&filter.locationId=${locID}&filter.limit=5`;
-
-  let results; // define results variable outside try-catch block
-
-  try {
-    const response = await axios.get(url, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (response.status !== 200) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    results = response.data.data; // Get the array of results
-  } catch (error) {
-    console.error('Error fetching data from Kroger:', error);
-    return;
-  }
-
-  // Prepare the arrays to hold the results per term
-  let aisles = [];
-  let categories = [];
-  let images = [];
-  let productIds = [];
-
-  // Iterate over the results for the term
-  for (let result of results) {
-    let aisle = result?.aisleLocations[0]?.description;
-    let category = result?.categories[0];
-    let image = result?.images[0];
-    let productId = result?.productId;
-
-    // Find the image where size is 'small'
-    let smallImage;
-    if (image?.sizes) {
-      for (let sizeObj of image.sizes) {
-        if (sizeObj.size === 'small') {
-          smallImage = sizeObj.url;
-          break;
-        }
-      }
-    }
-
-    // Push each value into its respective array
-    aisles.push(aisle);
-    categories.push(category);
-    images.push(smallImage);
-    productIds.push(productId);
-  }
-
-  // Return arrays with results
-  return { aisles, categories, images, productIds };
-};
-
-app.post('/getProductOptions', async (req, res) => {
-  console.log('Received POST from Glide');
-
-  // Log the request body
-  console.log('Request Body:', req.body);
-
-  let terms = req.body.params.terms?.value;
-  const locID = req.body.params.locID?.value;
-  const token = req.body.params.token?.value;
-  const rowID = req.body.params.rowID?.value;
-
-  // Convert the string into an array
-  terms = terms.split('|');
-
-  console.log('INPUT terms:', terms);
-  console.log('INPUT locID:', locID);
-
-  if (!terms || terms.length === 0 || !locID) {
-    console.error('terms or locationID not provided');
-    return res.sendStatus(400);
-  }
-
-  let allAisles = [];
-  let allCategories = [];
-  let allImages = [];
-  let allProductIds = [];
-
-  for (const term of terms) {
-    try {
-      let { aisles, categories, images, productIds } = await getProductOptions(term, locID, token);
-
-      // Push joined values from arrays into all* arrays
-      allAisles.push(aisles.join('|'));
-      allCategories.push(categories.join('|'));
-      allImages.push(images.join('|'));
-      allProductIds.push(productIds.join('|'));
-    } catch (error) {
-      console.error('Error getting aisle for term:', term, error);
-      res.sendStatus(500);
-      return;
-    }
-  }
-
-  // Convert the arrays into strings with '|' separator
-  let aislesString = allAisles.join('|');
-  let categoriesString = allCategories.join('|');
-  let imagesString = allImages.join('|');
-  let productIdsString = allProductIds.join('|');
-
-  const bearerToken = process.env.BEARER_TOKEN;
-
-  axios({
-    method: 'post',
-    url: 'https://api.glideapp.io/api/function/mutateTables',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${bearerToken}`,
-    },
-    data: {
-      "appID": "mtVYx3j3ot4FzRCdp3q4",
-      "mutations": [
-        {
-          "kind": "set-columns-in-row",
-          "tableName": "native-table-MX8xNW5WWoJhW4fwEeN7",
-          "columnValues": {
-            "HenO1": aislesString,
-            "5vQzp": categoriesString,
-            "CNtmj": imagesString,
-            "Oy9mB": productIdsString
           },
           "rowID": rowID
         }
